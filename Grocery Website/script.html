@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshMart - Online Grocery Store</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: #f5f5f5; color: #333; }
+        header { background-color: #4CAF50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.8rem; font-weight: bold; }
+        .search-container { display: flex; width: 50%; }
+        #search-input { padding: 0.8rem; width: 100%; border: none; border-radius: 4px 0 0 4px; font-size: 1rem; }
+        #search-button { padding: 0.8rem 1.5rem; background-color: #2E7D32; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer; font-size: 1rem; transition: background-color 0.3s; }
+        #search-button:hover { background-color: #1B5E20; }
+        nav { background-color: #388E3C; padding: 0.5rem 2rem; }
+        nav ul { display: flex; list-style: none; }
+        nav ul li { margin-right: 1.5rem; }
+        nav ul li a { color: white; text-decoration: none; font-weight: 500; padding: 0.5rem 0; display: block; cursor: pointer; }
+        nav ul li a:hover, .nav-link.active { border-bottom: 2px solid white; }
+        .container { padding: 2rem; }
+        .banner { background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; height: 300px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 2rem; border-radius: 8px; }
+        .banner-content { text-align: center; }
+        .banner h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .banner p { font-size: 1.2rem; margin-bottom: 1.5rem; }
+        .btn { padding: 0.8rem 1.5rem; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; text-decoration: none; display: inline-block; transition: background-color 0.3s; }
+        .btn:hover { background-color: #2E7D32; }
+        .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .products-header h2 { font-size: 1.8rem; color: #2E7D32; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem; }
+        .product-card { background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-image { height: 200px; background-color: #eee; background-size: cover; background-position: center; }
+        .product-info { padding: 1.5rem; }
+        .product-info h3 { margin-bottom: 0.5rem; font-size: 1.2rem; }
+        .product-info p { color: #666; margin-bottom: 1rem; }
+        .product-price { font-weight: bold; color: #2E7D32; font-size: 1.2rem; margin-bottom: 1rem; display: block; }
+        .add-to-cart { width: 100%; padding: 0.6rem; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        .add-to-cart:hover { background-color: #388E3C; }
+        footer { background-color: #2E7D32; color: white; text-align: center; padding: 2rem; margin-top: 2rem; }
+        .no-results { text-align: center; grid-column: 1 / -1; padding: 2rem; font-size: 1.2rem; color: #666; }
+        .currency-selector { margin-left: 1rem; padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd; }
+        .header-right { display: flex; align-items: center; }
+        .cart-icon { position: relative; margin-left: 20px; cursor: pointer; font-size: 1.5rem; }
+        .cart-count { position: absolute; top: -10px; right: -10px; background-color: #ff4444; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
+        .cart-items { max-height: 400px; overflow-y: auto; margin: 20px 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 10px 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-info { display: flex; align-items: center; }
+        .cart-item-image { width: 50px; height: 50px; background-size: cover; background-position: center; margin-right: 15px; border-radius: 4px; }
+        .cart-item-name { font-weight: bold; }
+        .cart-item-price { color: #2E7D32; font-weight: bold; }
+        .cart-item-quantity { display: flex; align-items: center; }
+        .quantity-btn { background-color: #f5f5f5; border: 1px solid #ddd; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .quantity-value { margin: 0 10px; min-width: 20px; text-align: center; }
+        .remove-item { color: #ff4444; cursor: pointer; margin-left: 15px; }
+        .cart-total { text-align: right; font-size: 1.2rem; font-weight: bold; margin: 20px 0; }
+        .cart-actions { display: flex; justify-content: space-between; }
+        .cart-btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .continue-shopping { background-color: #f5f5f5; color: #333; }
+        .checkout { background-color: #4CAF50; color: white; }
+        .order-confirmation { text-align: center; padding: 20px; }
+        .order-confirmation h2 { color: #4CAF50; margin-bottom: 20px; }
+        .order-confirmation p { margin-bottom: 20px; }
+        .back-to-shop { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .chatbot-container { position: fixed; bottom: 20px; right: 20px; width: 350px; z-index: 1000; font-family: Arial, sans-serif; }
+        .chatbot-toggle { background-color: #4CAF50; color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; margin-left: auto; }
+        .chatbot-window { background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); overflow: hidden; display: none; flex-direction: column; height: 400px; }
+        .chatbot-header { background-color: #4CAF50; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .chatbot-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .chatbot-messages { flex-grow: 1; padding: 15px; overflow-y: auto; background-color: #f9f9f9; }
+        .message { margin-bottom: 10px; padding: 8px 12px; border-radius: 18px; max-width: 80%; word-wrap: break-word; }
+        .bot-message { background-color: #e5e5ea; color: black; align-self: flex-start; border-bottom-left-radius: 5px; }
+        .user-message { background-color: #4CAF50; color: white; align-self: flex-end; border-bottom-right-radius: 5px; margin-left: auto; }
+        .chatbot-input { display: flex; padding: 10px; border-top: 1px solid #ddd; background-color: white; }
+        #chatbot-user-input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        #chatbot-send { background-color: #4CAF50; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; }
+        .quick-replies { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .quick-reply { background-color: #e5e5ea; border: none; border-radius: 15px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+        .quick-reply:hover { background-color: #d5d5da; }
+        .notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1000; opacity: 1; transition: opacity 0.5s; }
+        @media (max-width: 768px) { header { flex-direction: column; padding: 1rem; } .logo { margin-bottom: 1rem; } .search-container { width: 100%; } nav ul { flex-wrap: wrap; justify-content: center; } nav ul li { margin: 0.5rem; } .banner h1 { font-size: 2rem; } .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } .header-right { width: 100%; justify-content: space-between; margin-top: 1rem; } .chatbot-container { width: 300px; } .modal-content { width: 90%; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">FreshMart</div>
+        <div class="header-right">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search for products...">
+                <button id="search-button">Search</button>
+            </div>
+            <div class="cart-icon" id="cart-icon">
+                🛒
+                <span class="cart-count" id="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
+            <li><a href="#" class="nav-link" data-category="fruits">Fruits</a></li>
+            <li><a href="#" class="nav-link" data-category="vegetables">Vegetables</a></li>
+            <li><a href="#" class="nav-link" data-category="dairy">Dairy</a></li>
+            <li><a href="#" class="nav-link" data-category="meat">Meat</a></li>
+            <li><a href="#" class="nav-link" data-category="bakery">Bakery</a></li>
+            <li><a href="#" class="nav-link" data-category="sweets">Sweets</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="banner">
+            <div class="banner-content">
+                <h1>Fresh Groceries Delivered to Your Door</h1>
+                <p>Shop the best quality products at affordable prices</p>
+                <a href="#" class="btn" id="shop-now-btn">Shop Now</a>
+            </div>
+        </div>
+
+        <div class="products-header">
+            <h2 id="category-title">Our Products</h2>
+            <select id="currency-selector" class="currency-selector">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="JPY">JPY (¥)</option>
+            </select>
+        </div>
+
+        <div class="products-grid" id="products-container">
+            <!-- Products will be dynamically added here -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 FreshMart. All rights reserved.</p>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-cart">&times;</span>
+            <h2>Your Shopping Cart</h2>
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will be added here dynamically -->
+            </div>
+            <div class="cart-total">
+                Total: $<span id="cart-total">0.00</span>
+            </div>
+            <div class="cart-actions">
+                <button class="cart-btn continue-shopping" id="continue-shopping">Continue Shopping</button>
+                <button class="cart-btn checkout" id="checkout">Place Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div id="order-confirmation-modal" class="modal">
+        <div class="modal-content">
+            <div class="order-confirmation">
+                <h2>Order Placed Successfully!</h2>
+                <p>Thank you for your order. Your items will be delivered soon.</p>
+                <p>Order ID: <span id="order-id"></span></p>
+                <button class="back-to-shop" id="back-to-shop">Back to Shopping</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot HTML -->
+    <div class="chatbot-container">
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                FreshMart Assistant
+                <button class="chatbot-close" id="chatbot-close">×</button>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-user-input" placeholder="Type your message...">
+                <button id="chatbot-send">→</button>
+            </div>
+        </div>
+        <button class="chatbot-toggle" id="chatbot-toggle">💬</button>
+    </div>
+
+    <script>
+        // Currency conversion rates
+        const exchangeRates = {
+            USD: 1,
+            EUR: 0.85,
+            GBP: 0.73,
+            INR: 75.50,
+            JPY: 110.15
+        };
+
+        let currentCurrency = 'USD';
+        let allProducts = [];
+        let currentDisplayedProducts = [];
+        let cart = [];
+        let orderIdCounter = 1000;
+
+        // Product data (120+ items)
+        const productsData = [
+            // Fruits (20 items)
+            { id: 1, name: "Organic Apples", description: "Fresh organic apples", price: 2.99, category: "fruits", image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb" },
+            { id: 2, name: "Bananas", description: "Premium quality bananas", price: 1.49, category: "fruits", image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e" },
+            { id: 3, name: "Strawberries", description: "Sweet strawberries", price: 4.99, category: "fruits", image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6" },
+            { id: 4, name: "Oranges", description: "Florida oranges", price: 3.29, category: "fruits", image: "https://images.unsplash.com/photo-1557800636-894a64c1696f" },
+            { id: 5, name: "Grapes", description: "Seedless red grapes", price: 3.99, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 6, name: "Pineapple", description: "Sweet tropical pineapple", price: 4.49, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 7, name: "Watermelon", description: "Juicy seedless watermelon", price: 5.99, category: "fruits", image: "https://images.unsplash.com/photo-1563114775-a183c6b0699e" },
+            { id: 8, name: "Blueberries", description: "Fresh organic blueberries", price: 4.79, category: "fruits", image: "https://images.unsplash.com/photo-1457282367193-e3b79e38f207" },
+            { id: 9, name: "Raspberries", description: "Delicate red raspberries", price: 5.49, category: "fruits", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655" },
+            { id: 10, name: "Blackberries", description: "Sweet blackberries", price: 4.99, category: "fruits", image: "https://images.unsplash.com/photo-1493925410384-84f842e616fb" },
+            { id: 11, name: "Peaches", description: "Juicy ripe peaches", price: 3.29, category: "fruits", image: "https://images.unsplash.com/photo-1553272725-086100a252f3" },
+            { id: 12, name: "Plums", description: "Sweet dark plums", price: 2.99, category: "fruits", image: "https://images.unsplash.com/photo-1557800636-894a64c1696f" },
+            { id: 13, name: "Pears", description: "Bartlett pears", price: 2.49, category: "fruits", image: "https://images.unsplash.com/photo-1543253687-c931c8e01820" },
+            { id: 14, name: "Cherries", description: "Dark sweet cherries", price: 6.99, category: "fruits", image: "https://images.unsplash.com/photo-1528821128474-27a963b62e8e" },
+            { id: 15, name: "Mangoes", description: "Sweet tropical mangoes", price: 2.99, category: "fruits", image: "https://images.unsplash.com/photo-1553279768-865429fa0078" },
+            { id: 16, name: "Kiwi", description: "Green kiwi fruit", price: 1.99, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 17, name: "Pomegranate", description: "Ruby red pomegranate", price: 3.99, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 18, name: "Cantaloupe", description: "Sweet cantaloupe melon", price: 3.49, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 19, name: "Honeydew", description: "Fresh honeydew melon", price: 3.99, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 20, name: "Lemons", description: "Juicy lemons", price: 0.99, category: "fruits", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+
+            // Vegetables (20 items)
+            { id: 21, name: "Carrots", description: "Fresh carrots", price: 0.99, category: "vegetables", image: "https://images.unsplash.com/photo-1447175008436-054170c2e979" },
+            { id: 22, name: "Spinach", description: "Organic spinach", price: 3.49, category: "vegetables", image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb" },
+            { id: 23, name: "Broccoli", description: "Fresh broccoli", price: 2.49, category: "vegetables", image: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c" },
+            { id: 24, name: "Bell Peppers", description: "Mixed peppers", price: 1.99, category: "vegetables", image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa69" },
+            { id: 25, name: "Tomatoes", description: "Vine-ripened tomatoes", price: 2.29, category: "vegetables", image: "https://images.unsplash.com/photo-1590771129824-8db060adfb8d" },
+            { id: 26, name: "Cucumbers", description: "Fresh cucumbers", price: 1.49, category: "vegetables", image: "https://images.unsplash.com/photo-1604977046802-80b39b308b4a" },
+            { id: 27, name: "Potatoes", description: "Russet potatoes", price: 0.69, category: "vegetables", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655" },
+            { id: 28, name: "Onions", description: "Yellow onions", price: 0.89, category: "vegetables", image: "https://images.unsplash.com/photo-1580201092675-a0a6a6cafbb1" },
+            { id: 29, name: "Garlic", description: "Fresh garlic bulbs", price: 1.29, category: "vegetables", image: "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c" },
+            { id: 30, name: "Zucchini", description: "Green zucchini", price: 1.99, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 31, name: "Eggplant", description: "Purple eggplant", price: 2.49, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 32, name: "Celery", description: "Fresh celery stalks", price: 1.79, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 33, name: "Mushrooms", description: "White button mushrooms", price: 3.29, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 34, name: "Corn", description: "Sweet corn", price: 0.50, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 35, name: "Green Beans", description: "Fresh green beans", price: 2.99, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 36, name: "Peas", description: "Sweet peas", price: 1.99, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 37, name: "Asparagus", description: "Fresh asparagus", price: 3.99, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 38, name: "Brussels Sprouts", description: "Fresh Brussels sprouts", price: 3.49, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 39, name: "Kale", description: "Organic kale", price: 2.99, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 40, name: "Lettuce", description: "Romaine lettuce", price: 1.99, category: "vegetables", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+
+            // Dairy (20 items)
+            { id: 41, name: "Milk", description: "Whole milk", price: 3.49, category: "dairy", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150" },
+            { id: 42, name: "Yogurt", description: "Greek yogurt", price: 1.99, category: "dairy", image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71" },
+            { id: 43, name: "Cheese", description: "Cheddar cheese", price: 4.99, category: "dairy", image: "https://images.unsplash.com/photo-1550583724-b058c0b34d19" },
+            { id: 44, name: "Butter", description: "Salted butter", price: 2.49, category: "dairy", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d" },
+            { id: 45, name: "Cream", description: "Heavy whipping cream", price: 3.99, category: "dairy", image: "https://images.unsplash.com/photo-1550583724-2cc5c24a71a3" },
+            { id: 46, name: "Sour Cream", description: "Fresh sour cream", price: 2.29, category: "dairy", image: "https://images.unsplash.com/photo-1550583724-2cc5c24a71a3" },
+            { id: 47, name: "Cottage Cheese", description: "Low-fat cottage cheese", price: 2.99, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 48, name: "Mozzarella", description: "Fresh mozzarella", price: 4.49, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 49, name: "Parmesan", description: "Grated parmesan", price: 5.99, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 50, name: "Provolone", description: "Sliced provolone", price: 4.29, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 51, name: "Swiss Cheese", description: "Sliced Swiss cheese", price: 4.79, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 52, name: "Feta Cheese", description: "Crumbled feta", price: 3.99, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 53, name: "Ricotta", description: "Whole milk ricotta", price: 3.49, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 54, name: "Goat Cheese", description: "Creamy goat cheese", price: 5.49, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 55, name: "Half & Half", description: "Coffee creamer", price: 2.99, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 56, name: "Whipped Cream", description: "Canned whipped cream", price: 3.29, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 57, name: "Almond Milk", description: "Unsweetened almond milk", price: 3.99, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 58, name: "Soy Milk", description: "Vanilla soy milk", price: 3.49, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 59, name: "Oat Milk", description: "Creamy oat milk", price: 4.29, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 60, name: "Eggnog", description: "Seasonal eggnog", price: 4.99, category: "dairy", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+
+                        // Meat (continued)
+                        { id: 63, name: "Salmon", description: "Atlantic salmon", price: 8.99, category: "meat", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2" },
+            { id: 64, name: "Bacon", description: "Smoked bacon", price: 7.29, category: "meat", image: "https://images.unsplash.com/photo-1588345921523-e1edc5dc4f54" },
+            { id: 65, name: "Pork Chops", description: "Bone-in pork chops", price: 6.99, category: "meat", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143" },
+            { id: 66, name: "Turkey Breast", description: "Fresh turkey breast", price: 7.49, category: "meat", image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143" },
+            { id: 67, name: "Sausages", description: "Italian sausages", price: 5.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 68, name: "Ribeye Steak", description: "USDA prime ribeye", price: 12.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 69, name: "Chicken Thighs", description: "Bone-in thighs", price: 4.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 70, name: "Ground Turkey", description: "Lean ground turkey", price: 5.49, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 71, name: "Tilapia", description: "Fresh tilapia fillets", price: 7.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 72, name: "Shrimp", description: "Large shrimp", price: 9.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 73, name: "Ham", description: "Sliced ham", price: 6.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 74, name: "Chicken Wings", description: "Party wings", price: 5.49, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 75, name: "Lamb Chops", description: "Frenched lamb chops", price: 14.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 76, name: "Duck Breast", description: "Magret duck breast", price: 11.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 77, name: "Veal Cutlets", description: "Tender veal", price: 13.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 78, name: "Cornish Hens", description: "Whole Cornish hens", price: 8.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 79, name: "Ground Pork", description: "Fresh ground pork", price: 5.99, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 80, name: "Catfish", description: "Farm-raised catfish", price: 7.49, category: "meat", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+
+            // Bakery (20 items)
+            { id: 81, name: "Whole Wheat Bread", description: "Fresh bread", price: 2.29, category: "bakery", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff" },
+            { id: 82, name: "Croissants", description: "French croissants", price: 3.99, category: "bakery", image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569" },
+            { id: 83, name: "Muffins", description: "Blueberry muffins", price: 4.49, category: "bakery", image: "https://images.unsplash.com/photo-1550583724-8629f8e6a791" },
+            { id: 84, name: "Baguette", description: "French baguette", price: 1.99, category: "bakery", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff" },
+            { id: 85, name: "Donuts", description: "Glazed donuts", price: 3.49, category: "bakery", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307" },
+            { id: 86, name: "Cake", description: "Chocolate cake", price: 12.99, category: "bakery", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587" },
+            { id: 87, name: "Sourdough Bread", description: "Artisan sourdough", price: 4.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 88, name: "Cinnamon Rolls", description: "Fresh cinnamon rolls", price: 5.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 89, name: "Bagels", description: "Plain bagels", price: 3.29, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 90, name: "Pie", description: "Apple pie", price: 8.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 91, name: "Cookies", description: "Chocolate chip cookies", price: 4.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 92, name: "Brownies", description: "Fudge brownies", price: 5.49, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 93, name: "Dinner Rolls", description: "Fresh dinner rolls", price: 2.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 94, name: "Tortillas", description: "Flour tortillas", price: 1.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 95, name: "Pita Bread", description: "Whole wheat pita", price: 2.49, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 96, name: "English Muffins", description: "Toasting muffins", price: 3.29, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 97, name: "Biscuits", description: "Buttermilk biscuits", price: 2.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 98, name: "Focaccia", description: "Rosemary focaccia", price: 4.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 99, name: "Pretzels", description: "Soft pretzels", price: 3.49, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 100, name: "Pancakes", description: "Buttermilk pancake mix", price: 3.99, category: "bakery", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+
+            // Sweets (20 items)
+            { id: 101, name: "Chocolate Truffles", description: "Luxury Belgian chocolate", price: 8.99, category: "sweets", image: "https://images.unsplash.com/photo-1599490659213-e2b2087a49f8" },
+            { id: 102, name: "Gummy Bears", description: "Assorted fruit flavors", price: 3.49, category: "sweets", image: "https://images.unsplash.com/photo-1618897996318-5a901fa6ca71" },
+            { id: 103, name: "Lollipops", description: "Colorful swirl lollipops", price: 1.99, category: "sweets", image: "https://images.unsplash.com/photo-1603532648955-039310d9ed75" },
+            { id: 104, name: "Marshmallows", description: "Fluffy vanilla marshmallows", price: 2.99, category: "sweets", image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587" },
+            { id: 105, name: "Caramel Candies", description: "Buttery soft caramels", price: 4.49, category: "sweets", image: "https://images.unsplash.com/photo-1559620192-032c4bc4674e" },
+            { id: 106, name: "Jelly Beans", description: "Assorted fruit flavors", price: 3.99, category: "sweets", image: "https://images.unsplash.com/photo-1603532648955-039310d9ed75" },
+            { id: 107, name: "Chocolate Bars", description: "Milk chocolate bars", price: 2.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 108, name: "Licorice", description: "Red licorice twists", price: 2.49, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 109, name: "Peppermints", description: "Classic peppermints", price: 1.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 110, name: "Gum", description: "Bubble gum", price: 0.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 111, name: "Toffee", description: "English toffee", price: 5.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 112, name: "Fudge", description: "Chocolate fudge", price: 6.49, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 113, name: "Cotton Candy", description: "Pink cotton candy", price: 3.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 114, name: "Chocolate Covered Nuts", description: "Almonds in chocolate", price: 7.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 115, name: "Candy Canes", description: "Peppermint candy canes", price: 2.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 116, name: "Mints", description: "After-dinner mints", price: 1.49, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 117, name: "Rock Candy", description: "Crystal rock candy", price: 3.49, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 118, name: "Taffy", description: "Salt water taffy", price: 4.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 119, name: "Chocolate Coins", description: "Gold foil chocolate", price: 3.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" },
+            { id: 120, name: "Gummy Worms", description: "Sour gummy worms", price: 2.99, category: "sweets", image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba" }
+        ];
+
+        // Initialize the app
+        function init() {
+            allProducts = [...productsData];
+            currentDisplayedProducts = [...allProducts];
+            displayProducts(currentDisplayedProducts);
+            setupEventListeners();
+            setupChatbot();
+            setupCartModal();
+            loadCart();
+            updateCartUI();
+        }
+
+        // Display products with lazy loading
+        function displayProducts(productsToDisplay) {
+            currentDisplayedProducts = productsToDisplay;
+            const productsContainer = document.getElementById('products-container');
+            productsContainer.innerHTML = '';
+
+            if (productsToDisplay.length === 0) {
+                productsContainer.innerHTML = '<div class="no-results">No products found matching your search.</div>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            
+            productsToDisplay.forEach(product => {
+                const convertedPrice = product.price * exchangeRates[currentCurrency];
+                const currencySymbol = getCurrencySymbol(currentCurrency);
+                
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image" style="background-image: url('${product.image}')" loading="lazy"></div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <span class="product-price">${currencySymbol}${convertedPrice.toFixed(2)}</span>
+                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+                    </div>
+                `;
+                fragment.appendChild(productCard);
+            });
+
+            productsContainer.appendChild(fragment);
+            addCartEventListeners();
+        }
+
+        // Add event listeners to all "Add to Cart" buttons
+        function addCartEventListeners() {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-id'));
+                    addToCart(productId);
+                });
+            });
+        }
+
+        // Setup event listeners with debouncing
+        function setupEventListeners() {
+            // Debounced search
+            const debouncedSearch = debounce(searchProducts, 300);
+            document.getElementById('search-button').addEventListener('click', debouncedSearch);
+            document.getElementById('search-input').addEventListener('input', debouncedSearch);
+
+            // Category filter
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    filterByCategory(this);
+                });
+            });
+
+            // Currency selector
+            document.getElementById('currency-selector').addEventListener('change', function() {
+                currentCurrency = this.value;
+                displayProducts(currentDisplayedProducts);
+                updateCartUI();
+            });
+
+            // Shop Now button
+            document.getElementById('shop-now-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                showAllProducts();
+            });
+        }
+
+        // Debounce function for search
+        function debounce(func, timeout = 300){
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+
+        // [Rest of the functions remain the same as previous implementation]
+        // (searchProducts, filterByCategory, showAllProducts, cart functions, etc.)
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
